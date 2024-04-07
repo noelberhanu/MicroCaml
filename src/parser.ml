@@ -223,22 +223,22 @@ and parse_recordbodyexpr toks acc =
 let rec parse_mutop toks = 
   match toks with 
   |Tok_DoubleSemi :: t -> (t,NoOp)
-  |Tok_Def :: t -> parse_defmutop t 
-  |_ :: t -> parse_exprmutop toks
-  |[] -> failwith "empty list mutop"
+  |Tok_Def :: t -> let (t', m) = parse_defmutop t in
+                   let matcher = match_token t' Tok_DoubleSemi in
+                   (matcher, m)
+  |_ -> let (t',m) = parse_exprmutop toks in
+             let matcher = match_token t' Tok_DoubleSemi in
+             (matcher, m)
+
 
 and parse_defmutop toks = 
   match toks with 
   | Tok_ID s :: t -> let matcher = match_token t Tok_Equal in
                      let (t',m1) = parse_expr matcher in 
                      let semi = match_token t' Tok_DoubleSemi in (semi, Def(s,m1))
-  |_ :: t -> failwith "parse_defmutop"
-  |[] -> failwith "empty list defmutop"
+  |_  -> failwith "parse_defmutop"
 
-and parse_exprmutop toks = 
+and parse_exprmutop toks =
   let (t,m) = parse_expr toks in
   let matcher = match_token t Tok_DoubleSemi in (matcher, Expr m)
-
-
-
   

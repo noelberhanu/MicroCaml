@@ -88,11 +88,8 @@ let rec eval_expr env expr =
        | _ -> raise (TypeError "Not a function"))
   |_ -> failwith "lol"
 
-(* Let("f", true, (Fun ("x",
-    If (Binop (Equal, ID "x", (Int 0)), ID "x",
-      Binop (Add, ID "x",
-        App (ID "f", Binop (Sub, ID "x", (Int 1))))))), App (ID "f", (Int 8)))    *)
-(* Part 2: Evaluating mutop directive *)
+(* Let ("f", false, Fun ("x", Fun ("y", Binop (Add, ID "x", ID "y"))),
+  App (App (ID "f", (Int 1)), (Int 2))) *) 
 
 (* Evaluates MicroCaml mutop directive [m] in environment [env],
    returning a possibly updated environment paired with
