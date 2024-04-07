@@ -6,9 +6,9 @@ open Utils
 (* Matches the next token in the list, throwing an error if it doesn't match the given token *)
 let match_token (toks : token list) (tok : token) =
   match toks with
-  | [] -> raise (InvalidInputException (string_of_token tok))
+  | [] -> let _ = print_string "HERE!:"; print_string"\n" in raise (InvalidInputException (string_of_token tok))
   | h :: t when h = tok -> t
-  | h :: _ ->
+  | h :: _ -> 
       raise
         (InvalidInputException
            (Printf.sprintf "Expected %s from input %s, got %s"
@@ -238,6 +238,16 @@ and parse_defmutop toks =
   |_  -> failwith "parse_defmutop"
 
 and parse_exprmutop toks =
-  let (t,m) = parse_expr toks in
-  let matcher = match_token t Tok_DoubleSemi in (matcher, Expr m)
-  
+  let (t,m) = parse_expr toks in (t, Expr m)
+
+
+(*
+eval_expr [] (Let ("f", false, Fun ("x", Fun ("y", Binop (Add, ID "x", ID "y"))),
+  App (App (ID "f", (Int 1)), (Int 2)))) = Int 3
+*)
+
+(* eval_mutop [] (Def ("f",
+  Fun ("y",
+    If (Binop (Equal, ID "y", (Int 0)), (Int 1),
+    App (ID "f", Binop (Sub, ID "y", (Int 1)))))))
+*)
