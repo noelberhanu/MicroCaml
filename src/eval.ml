@@ -74,7 +74,7 @@ let rec eval_expr env expr =
        | Bool false -> eval_expr env e2
        | _ -> raise (TypeError "Expected type bool"))
   |Let (v, recursive, e1, e2) -> 
-        if recursive = true then
+        if (recursive = true) then
           let temp_e = extend_tmp env v in
           let e = eval_expr temp_e e1 in
           update temp_e v e; 
@@ -87,7 +87,7 @@ let rec eval_expr env expr =
       (match eval_expr env e1 with
        | Closure (env', param, rest) ->
            let arg = eval_expr env e2 in
-           let env'' = extend env param arg in 
+           let env'' = extend env' param arg in 
            eval_expr env'' rest
        | _ -> raise (TypeError "Not a function"))
   |Record lst -> 
@@ -113,11 +113,12 @@ let rec eval_expr env expr =
 
 let eval_mutop env m = 
 match m with
-  | Def (var, expr) ->
-      let evaluated_expr = eval_expr env expr in
-      let updated_env = (var, ref evaluated_expr) :: env in
-      (updated_env, Some evaluated_expr)
-  | Expr expr ->
-      let evaluated_expr = eval_expr env expr in
+  |NoOp -> (env, None)
+  |Expr e ->
+      let evaluated_expr = eval_expr env e in
       (env, Some evaluated_expr)
-  | NoOp -> (env, None)
+  |Def (v, e) ->
+      let evaluated_expr = eval_expr env e in
+      let updated_env = extend env v evaluated_expr in
+      (updated_env, Some evaluated_expr)
+
