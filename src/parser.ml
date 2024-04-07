@@ -234,8 +234,7 @@ let rec parse_mutop toks =
 and parse_defmutop toks = 
   match toks with 
   | Tok_ID s :: t -> let matcher = match_token t Tok_Equal in
-                     let (t',m1) = parse_expr matcher in 
-                     let semi = match_token t' Tok_DoubleSemi in (semi, Def(s,m1))
+                     let (t',m1) = parse_expr matcher in (t', Def(s,m1))
   |_  -> failwith "parse_defmutop"
 
 and parse_exprmutop toks =

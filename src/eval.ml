@@ -26,6 +26,10 @@ let rec update env x v =
 
 (* Evaluates MicroCaml expression [e] in environment [env],
    returning an expression, or throwing an exception on error *)
+
+
+
+
 let rec eval_expr env expr = 
   match expr with
   | Int _ | Bool _ | String _ -> expr
@@ -69,16 +73,16 @@ let rec eval_expr env expr =
        | Bool true -> eval_expr env e1
        | Bool false -> eval_expr env e2
        | _ -> raise (TypeError "Expected type bool"))
-  |Let (var, recursive, e1, e2) -> 
-      let new_env =
-        if recursive then
-          let placeholder = ref (Bool false) in
-          (var, placeholder) :: env
-        else env in
-      let v1 = eval_expr env e1 in
-      (match new_env with
-       | (var', placeholder) :: rest -> placeholder := v1
-       | _ -> ()); eval_expr ((var, ref v1) :: env) e2
+  |Let (v, recursive, e1, e2) -> 
+        if recursive = true then
+          let temp_e = extend_tmp env v in
+          let e = eval_expr temp_e e1 in
+          update temp_e v e; 
+          eval_expr temp_e e2 
+        else
+          let v1 = eval_expr env e1 in
+          let extra = extend env v v1 in 
+          eval_expr extra e2
   | App (e1, e2) ->
       (match eval_expr env e1 with
        | Closure (env', param, rest) ->
@@ -86,7 +90,18 @@ let rec eval_expr env expr =
            let env'' = extend env param arg in 
            eval_expr env'' rest
        | _ -> raise (TypeError "Not a function"))
+  |Record lst -> 
+    let fin = List.map (fun (l,e) -> (l, eval_expr env e)) lst in Record fin
+  |Select (l, e) -> 
+    let evaluated = eval_expr env e in 
+    (match evaluated with
+    |Record x -> let rec helper lst l env = (match lst with 
+                |[] -> failwith "Label Not Found"
+                |(label,expr) :: t -> if label = l then eval_expr env expr else helper t l env) in helper x l env
+    |_ -> failwith "Not a Record")
   |_ -> failwith "lol"
+
+
 
 (* Let ("f", false, Fun ("x", Fun ("y", Binop (Add, ID "x", ID "y"))),
   App (App (ID "f", (Int 1)), (Int 2))) *) 
@@ -94,4 +109,15 @@ let rec eval_expr env expr =
 (* Evaluates MicroCaml mutop directive [m] in environment [env],
    returning a possibly updated environment paired with
    a value option; throws an exception on error *)
-let eval_mutop env m = failwith "unimplemented"
+
+
+let eval_mutop env m = 
+match m with
+  | Def (var, expr) ->
+      let evaluated_expr = eval_expr env expr in
+      let updated_env = (var, ref evaluated_expr) :: env in
+      (updated_env, Some evaluated_expr)
+  | Expr expr ->
+      let evaluated_expr = eval_expr env expr in
+      (env, Some evaluated_expr)
+  | NoOp -> (env, None)
