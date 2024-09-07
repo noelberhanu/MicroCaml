@@ -240,14 +240,3 @@ and parse_defmutop toks =
 and parse_exprmutop toks =
   let (t,m) = parse_expr toks in (t, Expr m)
 
-
-(*
-eval_expr [] (Let ("f", false, Fun ("x", Fun ("y", Binop (Add, ID "x", ID "y"))),
-  App (App (ID "f", (Int 1)), (Int 2)))) = Int 3
-*)
-
-(* eval_mutop [] (Def ("f",
-  Fun ("y",
-    If (Binop (Equal, ID "y", (Int 0)), (Int 1),
-    App (ID "f", Binop (Sub, ID "y", (Int 1)))))))
-*)

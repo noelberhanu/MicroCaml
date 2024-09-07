@@ -102,10 +102,9 @@ let rec eval_expr env expr =
   |_ -> failwith "lol"
 
 
-
 (* Let ("f", false, Fun ("x", Fun ("y", Binop (Add, ID "x", ID "y"))),
   App (App (ID "f", (Int 1)), (Int 2))) *) 
-
+ 
 (* Evaluates MicroCaml mutop directive [m] in environment [env],
    returning a possibly updated environment paired with
    a value option; throws an exception on error *)

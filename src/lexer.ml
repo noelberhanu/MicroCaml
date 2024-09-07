@@ -180,7 +180,6 @@ let rec tok pos s tokens =
             tok (pos + len) s (Tok_ID token :: tokens)
         else
 	        if(Str.string_match re_arrow s pos) then 
-            (*ISSUE: "1->2" -> [Tok_Int 1; Tok_Sub; Tok_Greater; Tok_Int 2]*)
             tok (pos + 2) s (Tok_Arrow :: tokens)
         else
             if(Str.string_match re_num_neg s pos) then
